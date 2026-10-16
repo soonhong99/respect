@@ -1,0 +1,34 @@
+{
+  "config": "S4",
+  "frames": 1000,
+  "torch": "2.8.0a0+gitba56102",
+  "device": "NVIDIA Thor",
+  "argv": [
+    "scripts/measure_memory.py",
+    "--config",
+    "S4",
+    "--inputs",
+    "~/respect_inputs",
+    "--out",
+    "~/mem_261004/s4b_full"
+  ],
+  "started": "2026-10-04 17:33:44",
+  "loaded_alloc_mib": {
+    "target": 21141.6,
+    "fd_dflash": 896.1
+  },
+  "resident_alloc_after_warmup_mib": 22625.0,
+  "peak_alloc_mib": 23604.3,
+  "peak_reserved_mib": 24502.0,
+  "stage_peak_alloc_mib": {
+    "prefill": 23604.3,
+    "decode": 23415.0,
+    "flow": 23495.0
+  },
+  "system_used_before_load_mib": 3903.9,
+  "system_used_peak_mib": 31194.7,
+  "reference_match": 975,
+  "clocks": "nor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu5:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu6:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu7:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu8:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu9:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu10: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu11: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu12: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ncpu13: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0 \ngpu-gpc-0 MinFreq=1386000000 MaxFreq=1386000000 CurrentFreq=1386000000\ngpu-nvd-0 MinFreq=1557000000 MaxFreq=1557000000 CurrentFreq=1557000000\nEMC MinFreq=4266000000 MaxFreq=4266000000 CurrentFreq=4266000000\nPVA0_VPS0: Online=0 MinFreq=0 MaxFreq=1215000000 CurrentFreq=1215000000\nPVA0_AXI:  Online=0 MinFreq=0 MaxFreq=909000000 CurrentFreq=909000000\nFAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1=75\nFAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1_enable=1\nNV Power Mode: 120W",
+  "nvpmodel": "NV Power Mode: 120W\n1",
+  "minutes": 38.0
+}

@@ -1,0 +1,102 @@
+{
+ "0b929729-8240-4685-b22d-68233f52e024": {
+  "event_start_frame": 160,
+  "event_type": "WORK_ZONES_TEMP_TRAFFIC_CONTROL",
+  "v_r": 6.780372847234872,
+  "lead": {
+   "track": 112,
+   "cls": "person",
+   "gap_m": 20.768875852315908,
+   "v_f": -0.3104762888383782
+  }
+ },
+ "0d190f13-0cdd-4e8c-9720-a25c2599089e": {
+  "event_start_frame": 170,
+  "event_type": "WORK_ZONES_TEMP_TRAFFIC_CONTROL",
+  "v_r": 13.25938031596026,
+  "lead": null
+ },
+ "25c50d83-f845-427a-ab32-b6b599161553": {
+  "event_start_frame": 139,
+  "event_type": "SPECIAL_OR_UNCOMMON_VEHICLE_BEHAVIOR",
+  "v_r": 19.911452397972216,
+  "lead": {
+   "track": 10,
+   "cls": "heavy_truck",
+   "gap_m": 71.4397823184043,
+   "v_f": 7.516465577170621
+  }
+ },
+ "35d5c2f7-54c6-4572-9169-3e39fdd22f9b": {
+  "event_start_frame": 147,
+  "event_type": "CYCLISTS_AND_MICROMOBILITY_COMPLEX",
+  "v_r": 0.173217604676631,
+  "lead": {
+   "track": 16,
+   "cls": "automobile",
+   "gap_m": 62.66989020229227,
+   "v_f": 0.04980359608467539
+  }
+ },
+ "61d3622b-c307-4b02-a85d-697f9c82c52b": {
+  "event_start_frame": 150,
+  "event_type": "COMPLEX_INTERSECTION_INTERACTION",
+  "v_r": 0.8327463365738675,
+  "lead": {
+   "track": 75,
+   "cls": "automobile",
+   "gap_m": 28.437411920799914,
+   "v_f": 2.14516439208551
+  }
+ },
+ "796cef90-ae7d-4d82-a562-930a9aa7a896": {
+  "event_start_frame": 149,
+  "event_type": "CYCLISTS_AND_MICROMOBILITY_COMPLEX",
+  "v_r": 10.109233077772496,
+  "lead": null
+ },
+ "82acb8e5-abcf-4ea0-aa1a-7f18f6c79ff2": {
+  "event_start_frame": 151,
+  "event_type": "COMPLEX_INTERSECTION_INTERACTION",
+  "v_r": 0.12183415156435974,
+  "lead": {
+   "track": 14,
+   "cls": "automobile",
+   "gap_m": 13.14604645315225,
+   "v_f": 0.262673657275217
+  }
+ },
+ "868a46b4-c9ad-4413-820a-e5b63b50ad39": {
+  "event_start_frame": 150,
+  "event_type": "PEDESTRIAN_DENSITY_OR_CLOSE_PROXIMITY",
+  "v_r": 0.8997099725932559,
+  "lead": {
+   "track": 31,
+   "cls": "automobile",
+   "gap_m": 5.980099703257674,
+   "v_f": 4.275168345778253
+  }
+ },
+ "b1968a87-6a7b-4dc2-8b9f-245b376110ff": {
+  "event_start_frame": 144,
+  "event_type": "SPECIAL_OR_UNCOMMON_VEHICLE_BEHAVIOR",
+  "v_r": 8.000326750182953,
+  "lead": {
+   "track": 17,
+   "cls": "automobile",
+   "gap_m": 19.729146619274925,
+   "v_f": 7.309687018239433
+  }
+ },
+ "bbbe775f-fef1-45c5-bbdd-6f9c121e2ac4": {
+  "event_start_frame": 146,
+  "event_type": "PEDESTRIAN_DENSITY_OR_CLOSE_PROXIMITY",
+  "v_r": 4.9052835673374755,
+  "lead": {
+   "track": 4,
+   "cls": "automobile",
+   "gap_m": 17.27995940556124,
+   "v_f": 0.0009917015424779172
+  }
+ }
+}

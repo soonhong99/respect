@@ -1,0 +1,492 @@
+[
+ {
+  "set": "event",
+  "clip_id": "0b929729-8240-4685-b22d-68233f52e024",
+  "fill_frame": 139,
+  "overlap_equal": true,
+  "s": 37.5
+ },
+ {
+  "set": "event",
+  "clip_id": "0d190f13-0cdd-4e8c-9720-a25c2599089e",
+  "fill_frame": 149,
+  "overlap_equal": true,
+  "s": 6.9
+ },
+ {
+  "set": "event",
+  "clip_id": "25c50d83-f845-427a-ab32-b6b599161553",
+  "fill_frame": 118,
+  "overlap_equal": true,
+  "s": 26.0
+ },
+ {
+  "set": "event",
+  "clip_id": "35d5c2f7-54c6-4572-9169-3e39fdd22f9b",
+  "fill_frame": 126,
+  "overlap_equal": true,
+  "s": 26.9
+ },
+ {
+  "set": "event",
+  "clip_id": "61d3622b-c307-4b02-a85d-697f9c82c52b",
+  "fill_frame": 129,
+  "overlap_equal": true,
+  "s": 31.6
+ },
+ {
+  "set": "event",
+  "clip_id": "796cef90-ae7d-4d82-a562-930a9aa7a896",
+  "fill_frame": 128,
+  "overlap_equal": true,
+  "s": 31.7
+ },
+ {
+  "set": "event",
+  "clip_id": "82acb8e5-abcf-4ea0-aa1a-7f18f6c79ff2",
+  "fill_frame": 130,
+  "overlap_equal": true,
+  "s": 26.8
+ },
+ {
+  "set": "event",
+  "clip_id": "868a46b4-c9ad-4413-820a-e5b63b50ad39",
+  "fill_frame": 129,
+  "overlap_equal": true,
+  "s": 5.7
+ },
+ {
+  "set": "event",
+  "clip_id": "b1968a87-6a7b-4dc2-8b9f-245b376110ff",
+  "fill_frame": 123,
+  "overlap_equal": true,
+  "s": 30.8
+ },
+ {
+  "set": "event",
+  "clip_id": "bbbe775f-fef1-45c5-bbdd-6f9c121e2ac4",
+  "fill_frame": 125,
+  "overlap_equal": true,
+  "s": 4.6
+ },
+ {
+  "set": "general",
+  "clip_id": "011f411b-e463-49ee-9e75-24a8c1917001",
+  "fill_frame": 80,
+  "overlap_equal": true,
+  "s": 25.9
+ },
+ {
+  "set": "general",
+  "clip_id": "02ad4974-1d7e-4d23-8c46-1a1b4fa4b98a",
+  "fill_frame": 126,
+  "overlap_equal": true,
+  "s": 32.3
+ },
+ {
+  "set": "general",
+  "clip_id": "0732bfa7-9467-4e0f-8a3e-95cfac900365",
+  "fill_frame": 67,
+  "overlap_equal": true,
+  "s": 25.9
+ },
+ {
+  "set": "general",
+  "clip_id": "0c9a05ea-e960-4b25-81aa-305f972f6bb2",
+  "fill_frame": 80,
+  "overlap_equal": true,
+  "s": 28.8
+ },
+ {
+  "set": "general",
+  "clip_id": "0e6c6981-83fa-4ba1-8dc8-b4d949e5f5b2",
+  "fill_frame": 176,
+  "overlap_equal": true,
+  "s": 32.0
+ },
+ {
+  "set": "general",
+  "clip_id": "11e37499-15f6-440c-8acb-bc0c53f08b5d",
+  "fill_frame": 125,
+  "overlap_equal": true,
+  "s": 25.1
+ },
+ {
+  "set": "general",
+  "clip_id": "1d2163a1-df6b-486e-a5aa-6c26f74de3d2",
+  "fill_frame": 123,
+  "overlap_equal": true,
+  "s": 26.8
+ },
+ {
+  "set": "general",
+  "clip_id": "1df398af-140a-45fd-b677-ac9cd4fd9a77",
+  "fill_frame": 115,
+  "overlap_equal": true,
+  "s": 30.7
+ },
+ {
+  "set": "general",
+  "clip_id": "226660f0-94e7-4939-b199-cd8358cd2c7a",
+  "fill_frame": 89,
+  "overlap_equal": true,
+  "s": 32.2
+ },
+ {
+  "set": "general",
+  "clip_id": "2a118a8a-468b-43ef-a24e-73d1132fd5b1",
+  "fill_frame": 128,
+  "overlap_equal": true,
+  "s": 24.9
+ },
+ {
+  "set": "general",
+  "clip_id": "2ef53bf5-5f3d-4af5-b7fc-8ace9d486845",
+  "fill_frame": 136,
+  "overlap_equal": true,
+  "s": 29.8
+ },
+ {
+  "set": "general",
+  "clip_id": "3029087f-585e-4e60-a63f-ba11ca676a4b",
+  "fill_frame": 97,
+  "overlap_equal": true,
+  "s": 24.0
+ },
+ {
+  "set": "general",
+  "clip_id": "34583cae-d436-434d-a5c2-71cfe875bf39",
+  "fill_frame": 75,
+  "overlap_equal": true,
+  "s": 26.6
+ },
+ {
+  "set": "general",
+  "clip_id": "42790b3a-0083-4058-93a9-b96ab3c162aa",
+  "fill_frame": 48,
+  "overlap_equal": true,
+  "s": 29.1
+ },
+ {
+  "set": "general",
+  "clip_id": "439ef30d-4da9-4f0a-9083-e5b6949cb714",
+  "fill_frame": 118,
+  "overlap_equal": true,
+  "s": 28.1
+ },
+ {
+  "set": "general",
+  "clip_id": "4730b6b8-976b-4bc0-b9f3-13592ac6d0d8",
+  "fill_frame": 152,
+  "overlap_equal": true,
+  "s": 27.0
+ },
+ {
+  "set": "general",
+  "clip_id": "4a899003-c242-4163-b8c7-07c4b0afa841",
+  "fill_frame": 163,
+  "overlap_equal": true,
+  "s": 25.5
+ },
+ {
+  "set": "general",
+  "clip_id": "4cf619d0-d9a9-481c-9fbf-489cfdccc388",
+  "fill_frame": 85,
+  "overlap_equal": true,
+  "s": 30.2
+ },
+ {
+  "set": "general",
+  "clip_id": "52af975b-5f97-440f-a8ae-5723e3c68a15",
+  "fill_frame": 139,
+  "overlap_equal": true,
+  "s": 43.0
+ },
+ {
+  "set": "general",
+  "clip_id": "54c2eb45-724e-4c91-a1fb-c68c0195f274",
+  "fill_frame": 51,
+  "overlap_equal": true,
+  "s": 27.2
+ },
+ {
+  "set": "general",
+  "clip_id": "5f6b4757-4b4d-4aeb-a71d-bfa484360543",
+  "fill_frame": 81,
+  "overlap_equal": true,
+  "s": 23.8
+ },
+ {
+  "set": "general",
+  "clip_id": "618c846f-a656-4779-abfa-c5a78e7dad4b",
+  "fill_frame": 72,
+  "overlap_equal": true,
+  "s": 24.9
+ },
+ {
+  "set": "general",
+  "clip_id": "7613e2db-efe8-4523-b10f-82d0ff9d8bad",
+  "fill_frame": 157,
+  "overlap_equal": true,
+  "s": 29.6
+ },
+ {
+  "set": "general",
+  "clip_id": "7a88cc9d-bc10-4405-9d49-ab01de7b07f4",
+  "fill_frame": 138,
+  "overlap_equal": true,
+  "s": 36.0
+ },
+ {
+  "set": "general",
+  "clip_id": "7d1f7db3-678f-4bdc-a82d-736e3164a4a6",
+  "fill_frame": 82,
+  "overlap_equal": true,
+  "s": 27.6
+ },
+ {
+  "set": "general",
+  "clip_id": "82b7064d-7a7e-4e59-80a9-b2067f51cf84",
+  "fill_frame": 168,
+  "overlap_equal": true,
+  "s": 26.3
+ },
+ {
+  "set": "general",
+  "clip_id": "82ca3171-cd5c-44d2-ab1e-9f9df87e566e",
+  "fill_frame": 95,
+  "overlap_equal": true,
+  "s": 31.2
+ },
+ {
+  "set": "general",
+  "clip_id": "88f268cf-0b04-46c8-a92b-e9e4daf1f419",
+  "fill_frame": 90,
+  "overlap_equal": true,
+  "s": 27.8
+ },
+ {
+  "set": "general",
+  "clip_id": "8d60dd5e-a16e-4a39-bdf0-d3ff61ebef02",
+  "fill_frame": 84,
+  "overlap_equal": true,
+  "s": 26.4
+ },
+ {
+  "set": "general",
+  "clip_id": "9652145d-c6e3-46a7-96b6-32c97b341536",
+  "fill_frame": 99,
+  "overlap_equal": true,
+  "s": 30.3
+ },
+ {
+  "set": "general",
+  "clip_id": "9feabed3-ddac-44b0-b1cf-30301b5796bb",
+  "fill_frame": 162,
+  "overlap_equal": true,
+  "s": 31.4
+ },
+ {
+  "set": "general",
+  "clip_id": "a4d51a83-43dd-4bbc-971f-8e4ad7add0c8",
+  "fill_frame": 162,
+  "overlap_equal": true,
+  "s": 29.1
+ },
+ {
+  "set": "general",
+  "clip_id": "a579d76e-c89f-4ba8-ac4d-75b050a82363",
+  "fill_frame": 90,
+  "overlap_equal": true,
+  "s": 24.6
+ },
+ {
+  "set": "general",
+  "clip_id": "a7070c3f-38a5-46ff-ad54-04e5401a8d89",
+  "fill_frame": 115,
+  "overlap_equal": true,
+  "s": 31.9
+ },
+ {
+  "set": "general",
+  "clip_id": "a9b02b12-c07d-4fb6-a525-c9372a1d93b3",
+  "fill_frame": 126,
+  "overlap_equal": true,
+  "s": 31.1
+ },
+ {
+  "set": "general",
+  "clip_id": "abde223d-97ff-4183-a1e2-aa4b557fd935",
+  "fill_frame": 165,
+  "overlap_equal": true,
+  "s": 28.3
+ },
+ {
+  "set": "general",
+  "clip_id": "ac5e8986-8f7d-4094-b69b-bddf8e592e2d",
+  "fill_frame": 53,
+  "overlap_equal": true,
+  "s": 30.3
+ },
+ {
+  "set": "general",
+  "clip_id": "b12f6a71-cf9a-4b4d-852f-923b5e0c7ab6",
+  "fill_frame": 157,
+  "overlap_equal": true,
+  "s": 26.4
+ },
+ {
+  "set": "general",
+  "clip_id": "b72bed32-a05e-4779-a377-8a4a0592037e",
+  "fill_frame": 130,
+  "overlap_equal": true,
+  "s": 27.8
+ },
+ {
+  "set": "general",
+  "clip_id": "ba3299a5-37a9-4a3c-95ee-2a46d5bbd262",
+  "fill_frame": 63,
+  "overlap_equal": true,
+  "s": 21.8
+ },
+ {
+  "set": "general",
+  "clip_id": "bc6fff6c-4f5a-4b24-8b32-c0686a374e22",
+  "fill_frame": 67,
+  "overlap_equal": true,
+  "s": 28.0
+ },
+ {
+  "set": "general",
+  "clip_id": "bfbe3057-cbd4-4a68-8c31-bce9d412e6ce",
+  "fill_frame": 159,
+  "overlap_equal": true,
+  "s": 28.7
+ },
+ {
+  "set": "general",
+  "clip_id": "c37d15ff-0b08-4c03-90cb-cab217b7acf8",
+  "fill_frame": 70,
+  "overlap_equal": true,
+  "s": 31.0
+ },
+ {
+  "set": "general",
+  "clip_id": "c4634892-26e1-4bda-be2d-b9a794cb7884",
+  "fill_frame": 75,
+  "overlap_equal": true,
+  "s": 26.4
+ },
+ {
+  "set": "general",
+  "clip_id": "c4ac28c2-ea5c-423f-a47b-fc76a9f8c34e",
+  "fill_frame": 158,
+  "overlap_equal": true,
+  "s": 32.5
+ },
+ {
+  "set": "general",
+  "clip_id": "c643d557-3c0d-437d-836d-8b9d2fbd730c",
+  "fill_frame": 54,
+  "overlap_equal": true,
+  "s": 28.0
+ },
+ {
+  "set": "general",
+  "clip_id": "cffa6719-4bab-4f9b-bf11-4e8c1cbc3a62",
+  "fill_frame": 82,
+  "overlap_equal": true,
+  "s": 28.2
+ },
+ {
+  "set": "general",
+  "clip_id": "d34156fe-f0dc-4a8b-9bbc-a3d3024f7db3",
+  "fill_frame": 180,
+  "overlap_equal": true,
+  "s": 29.9
+ },
+ {
+  "set": "general",
+  "clip_id": "d455ef3e-0ed2-46a9-bc3c-14f357f1900a",
+  "fill_frame": 87,
+  "overlap_equal": true,
+  "s": 28.1
+ },
+ {
+  "set": "general",
+  "clip_id": "daa48cef-3f1b-4a4b-aa75-e118e0a1d1de",
+  "fill_frame": 64,
+  "overlap_equal": true,
+  "s": 25.4
+ },
+ {
+  "set": "general",
+  "clip_id": "e0d61aff-d3ca-4142-822b-4711e7374c93",
+  "fill_frame": 103,
+  "overlap_equal": true,
+  "s": 35.5
+ },
+ {
+  "set": "general",
+  "clip_id": "e648a99f-f7a3-41aa-b162-05f0389ccdc6",
+  "fill_frame": 177,
+  "overlap_equal": true,
+  "s": 28.0
+ },
+ {
+  "set": "general",
+  "clip_id": "e7950c04-a5e4-4e06-8675-61da0c31d794",
+  "fill_frame": 101,
+  "overlap_equal": true,
+  "s": 27.0
+ },
+ {
+  "set": "general",
+  "clip_id": "ed62767c-2c73-4816-9faa-ea8f0a5c7502",
+  "fill_frame": 124,
+  "overlap_equal": true,
+  "s": 32.0
+ },
+ {
+  "set": "general",
+  "clip_id": "eef87635-e70c-4f5b-a48d-395e87e4c334",
+  "fill_frame": 64,
+  "overlap_equal": true,
+  "s": 24.9
+ },
+ {
+  "set": "general",
+  "clip_id": "f9152391-6e65-4637-b147-9ae61a4ceaf5",
+  "fill_frame": 57,
+  "overlap_equal": true,
+  "s": 28.0
+ },
+ {
+  "set": "general",
+  "clip_id": "fafc62c4-4962-4d9b-9123-80f35af8fe02",
+  "fill_frame": 90,
+  "overlap_equal": true,
+  "s": 24.7
+ },
+ {
+  "set": "general",
+  "clip_id": "fbc377a8-4d13-4617-85f4-a556094aaf63",
+  "fill_frame": 109,
+  "overlap_equal": true,
+  "s": 25.2
+ },
+ {
+  "set": "general",
+  "clip_id": "fe7be133-0711-45a0-b2d7-57de470dcd14",
+  "fill_frame": 141,
+  "overlap_equal": true,
+  "s": 27.3
+ },
+ {
+  "set": "general",
+  "clip_id": "ff494a3a-860a-4cd5-8ea8-6a2455a92367",
+  "fill_frame": 155,
+  "overlap_equal": true,
+  "s": 25.3
+ }
+]

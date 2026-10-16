@@ -1,0 +1,495 @@
+diff --git a/aten/src/ATen/cuda/cub.cu b/aten/src/ATen/cuda/cub.cu
+index 839652f581a..1b1d8331642 100644
+--- a/aten/src/ATen/cuda/cub.cu
++++ b/aten/src/ATen/cuda/cub.cu
+@@ -1,6 +1,7 @@
+ #define TORCH_ASSERT_NO_OPERATORS
+ #include <ATen/cuda/cub.cuh>
+ #include <ATen/cuda/CUDAConfig.h>
++#include <thrust/iterator/transform_iterator.h>
+ 
+ namespace at::cuda::cub {
+ 
+@@ -15,8 +16,7 @@ struct SumOp {
+ 
+ template <typename input_t, typename output_t>
+ void inclusive_sum_truncating(const input_t *input, output_t *output, int64_t num_items) {
+-  using NO_ROCM(at_cuda_detail)::cub::Sum;
+-  inclusive_scan(input, output, Sum{}, num_items);
++  inclusive_scan(input, output, SumOp<output_t>{}, num_items);
+ }
+ 
+ template void inclusive_sum_truncating(const int32_t *input, int32_t *output, int64_t num_items);
+@@ -42,8 +42,7 @@ struct CountMaskOp {
+ 
+ void mask_exclusive_sum(const uint8_t *mask, int64_t *output_idx, int64_t n) {
+   CountMaskOp op{};
+-  auto iter = NO_ROCM(at_cuda_detail)::cub::TransformInputIterator<
+-      bool, decltype(op), decltype(mask)>(mask, op);
++  auto iter = thrust::make_transform_iterator(mask, op);
+   exclusive_scan(iter, output_idx, SumOp<int64_t>{}, int64_t{0}, n);
+ }
+ 
+diff --git a/aten/src/ATen/cuda/cub.cuh b/aten/src/ATen/cuda/cub.cuh
+index e1d452bac4a..0cc3cb6f1e2 100644
+--- a/aten/src/ATen/cuda/cub.cuh
++++ b/aten/src/ATen/cuda/cub.cuh
+@@ -1,5 +1,7 @@
+ #pragma once
+ #include <ATen/cuda/cub.h>
++#include <thrust/iterator/transform_iterator.h>
++#include <cuda/std/functional>
+ 
+ #include <cstddef>
+ #include <type_traits>
+@@ -270,7 +272,7 @@ inline void inclusive_scan(InputIteratorT input, OutputIteratorT output, ScanOpT
+         return x.value;
+       }
+     };
+-    auto input_ = NO_ROCM(at_cuda_detail)::cub::TransformInputIterator<input_t, decltype(input_iter_transform), ArgIndexInputIterator>(
++    auto input_ = thrust::make_transform_iterator(
+       ArgIndexInputIterator(input + i), input_iter_transform);
+     CUB_WRAPPER(NO_ROCM(at_cuda_detail)::cub::DeviceScan::InclusiveScan,
+         input_,
+@@ -425,7 +427,7 @@ __global__ void calc_block_sums(const T * d_in, aggT * agg, int64_t nelem, int i
+     aggT data[ITEMS_PER_THREAD];
+     aggT agg_val = 0;
+     TransformFunctor<T, aggT, nonzero> transform_functor;
+-    auto iter_in = ROCM_HIPCUB(at_cuda_detail::cub)::TransformInputIterator<aggT, TransformFunctor<T, aggT, nonzero>, const T*>(d_in, transform_functor);
++    auto iter_in = thrust::make_transform_iterator(d_in, transform_functor);
+     for (int i=0; i<iters_per_cta; i++){
+       if (remaining >= BLOCK_THREADS * ITEMS_PER_THREAD) {
+         BlockLoadT(temp_storage.load).Load(iter_in, data);
+@@ -568,7 +570,7 @@ inline void inclusive_sum_by_key(KeysInputIteratorT keys, ValuesInputIteratorT i
+     "cub InclusiveSumByKey does not support more than INT_MAX elements");
+ #if !defined(USE_ROCM)
+   CUB_WRAPPER(at_cuda_detail::cub::DeviceScan::InclusiveSumByKey,
+-      keys, input, output, num_items, at_cuda_detail::cub::Equality(), at::cuda::getCurrentCUDAStream());
++      keys, input, output, num_items, ::cuda::std::equal_to<>{}, at::cuda::getCurrentCUDAStream());
+ #else
+   CUB_WRAPPER(cub::DeviceScan::InclusiveSumByKey,
+       keys, input, output, num_items, hipcub::Equality(), at::cuda::getCurrentCUDAStream());
+@@ -581,7 +583,7 @@ inline void inclusive_scan_by_key(KeysInputIteratorT keys, ValuesInputIteratorT
+     "cub InclusiveSumByKey does not support more than INT_MAX elements");
+ #if !defined(USE_ROCM)
+   CUB_WRAPPER(at_cuda_detail::cub::DeviceScan::InclusiveScanByKey,
+-      keys, input, output, scan_op, num_items, at_cuda_detail::cub::Equality(), at::cuda::getCurrentCUDAStream());
++      keys, input, output, scan_op, num_items, ::cuda::std::equal_to<>{}, at::cuda::getCurrentCUDAStream());
+ #else
+   CUB_WRAPPER(cub::DeviceScan::InclusiveScanByKey,
+       keys, input, output, scan_op, num_items, hipcub::Equality(), at::cuda::getCurrentCUDAStream());
+diff --git a/aten/src/ATen/native/cuda/CuFFTUtils.h b/aten/src/ATen/native/cuda/CuFFTUtils.h
+index f20baa95686..efefc8af76d 100644
+--- a/aten/src/ATen/native/cuda/CuFFTUtils.h
++++ b/aten/src/ATen/native/cuda/CuFFTUtils.h
+@@ -38,20 +38,12 @@ static inline std::string _cudaGetErrorEnum(cufftResult error)
+       return "CUFFT_INVALID_SIZE";
+     case CUFFT_UNALIGNED_DATA:
+       return "CUFFT_UNALIGNED_DATA";
+-    case CUFFT_INCOMPLETE_PARAMETER_LIST:
+-      return "CUFFT_INCOMPLETE_PARAMETER_LIST";
+     case CUFFT_INVALID_DEVICE:
+       return "CUFFT_INVALID_DEVICE";
+-    case CUFFT_PARSE_ERROR:
+-      return "CUFFT_PARSE_ERROR";
+     case CUFFT_NO_WORKSPACE:
+       return "CUFFT_NO_WORKSPACE";
+     case CUFFT_NOT_IMPLEMENTED:
+       return "CUFFT_NOT_IMPLEMENTED";
+-#if !defined(USE_ROCM)
+-    case CUFFT_LICENSE_ERROR:
+-      return "CUFFT_LICENSE_ERROR";
+-#endif
+     case CUFFT_NOT_SUPPORTED:
+       return "CUFFT_NOT_SUPPORTED";
+     default:
+diff --git a/aten/src/ATen/native/cuda/Embedding.cu b/aten/src/ATen/native/cuda/Embedding.cu
+index 5d19b95b32f..2d1e2737801 100644
+--- a/aten/src/ATen/native/cuda/Embedding.cu
++++ b/aten/src/ATen/native/cuda/Embedding.cu
+@@ -1,3 +1,5 @@
++#include <thrust/iterator/constant_iterator.h>
++#include <cuda/functional>
+ #define TORCH_ASSERT_ONLY_METHOD_OPERATORS
+ #include <ATen/core/Tensor.h>
+ #include <ATen/AccumulateType.h>
+@@ -317,7 +319,7 @@ Tensor embedding_dense_backward_cuda(const Tensor & grad_, const Tensor & indice
+       auto count_data = count.mutable_data_ptr<index_t>();
+       cuda::cub::inclusive_sum_by_key(
+         sorted_data,
+-        NO_ROCM(at_cuda_detail)ROCM_HIPCUB(::cub)::ConstantInputIterator<index_t>(1),
++        thrust::make_constant_iterator<index_t>(1),
+         count_data,
+         num_indices
+       );
+@@ -329,7 +331,7 @@ Tensor embedding_dense_backward_cuda(const Tensor & grad_, const Tensor & indice
+         thrust::make_reverse_iterator(sorted_data + num_indices),
+         thrust::make_reverse_iterator(static_cast<const index_t*>(count_data) + num_indices),
+         thrust::make_reverse_iterator(count_data + num_indices),
+-        NO_ROCM(at_cuda_detail)ROCM_HIPCUB(::cub)::Max(),
++        ::cuda::maximum<>{},
+         num_indices
+       );
+     });
+diff --git a/aten/src/ATen/native/cuda/EmbeddingBag.cu b/aten/src/ATen/native/cuda/EmbeddingBag.cu
+index 5a6961187a2..c90b7b3e2c9 100644
+--- a/aten/src/ATen/native/cuda/EmbeddingBag.cu
++++ b/aten/src/ATen/native/cuda/EmbeddingBag.cu
+@@ -1,3 +1,5 @@
++#include <thrust/iterator/constant_iterator.h>
++#include <cuda/functional>
+ #define TORCH_ASSERT_ONLY_METHOD_OPERATORS
+ #include <ATen/core/Tensor.h>
+ #include <ATen/AccumulateType.h>
+@@ -210,7 +212,7 @@ Tensor embedding_bag_backward_cuda_sum_avg(
+       auto count_data = count.mutable_data_ptr<index_t>();
+       cuda::cub::inclusive_sum_by_key(
+         sorted_data,
+-        NO_ROCM(at_cuda_detail)ROCM_HIPCUB(::cub)::ConstantInputIterator<index_t>(1),
++        thrust::make_constant_iterator<index_t>(1),
+         count_data,
+         num_indices
+       );
+@@ -222,7 +224,7 @@ Tensor embedding_bag_backward_cuda_sum_avg(
+         thrust::make_reverse_iterator(sorted_data + num_indices),
+         thrust::make_reverse_iterator(count_data + num_indices),
+         thrust::make_reverse_iterator(count_data + num_indices),
+-        NO_ROCM(at_cuda_detail)ROCM_HIPCUB(::cub)::Max(),
++        ::cuda::maximum<>{},
+         num_indices
+       );
+     });
+diff --git a/aten/src/ATen/native/cuda/Nonzero.cu b/aten/src/ATen/native/cuda/Nonzero.cu
+index d61b99fb5a3..767ed2d51a9 100644
+--- a/aten/src/ATen/native/cuda/Nonzero.cu
++++ b/aten/src/ATen/native/cuda/Nonzero.cu
+@@ -1,5 +1,7 @@
+ #define TORCH_ASSERT_ONLY_METHOD_OPERATORS
+ #include <ATen/Dispatch.h>
++#include <thrust/iterator/transform_iterator.h>
++#include <thrust/iterator/counting_iterator.h>
+ #include <ATen/EmptyTensor.h>
+ #include <ATen/core/Tensor.h>
+ #include <ATen/cuda/CUDAContext.h>
+@@ -94,7 +96,7 @@ __global__ void flag_kernel(const T* d_in, int64_t * d_out, const int64_t * agg,
+ 
+   // Specialize BlockScan type for our thread block
+   using BlockScanT = ROCM_HIPCUB(at_cuda_detail::cub)::BlockScan<int, BLOCK_THREADS, ROCM_HIPCUB(at_cuda_detail::cub)::BLOCK_SCAN_WARP_SCANS>;
+-  using TransformInputIteratorT = ROCM_HIPCUB(at_cuda_detail::cub)::TransformInputIterator<int, NonZeroOp<T>, const T*>;
++  using TransformInputIteratorT = thrust::transform_iterator<NonZeroOp<T>, const T*>;
+   using BlockExchangeT =  ROCM_HIPCUB(at_cuda_detail::cub)::BlockExchange<int, BLOCK_THREADS, ITEMS_PER_THREAD>;
+ 
+   // Shared memory
+@@ -184,7 +186,7 @@ void nonzero_cuda_out_impl(const Tensor& self, Tensor& out) {
+   auto num_nonzeros = allocator.allocate(sizeof(int) * num_chunks);
+   for (int64_t idx = 0; idx < num_chunks; idx++) {
+     int64_t remaining = std::min(chunk_size, self.numel() - idx * chunk_size);
+-    cub::TransformInputIterator<bool, NonZeroOp<scalar_t>, const scalar_t*> itr(
++    auto itr = thrust::make_transform_iterator(
+         self_.const_data_ptr<scalar_t>() + idx * chunk_size,
+         NonZeroOp<scalar_t>());
+     AT_CUDA_CHECK(cub::DeviceReduce::Sum(
+@@ -243,10 +245,10 @@ void nonzero_cuda_out_impl(const Tensor& self, Tensor& out) {
+     for (int64_t idx = 0; idx < num_chunks; idx++) {
+       int remaining = std::min(chunk_size, self.numel() - idx * chunk_size);
+ 
+-      cub::CountingInputIterator<int64_t> counting_itr(idx * chunk_size);
+-      cub::TransformInputIterator<bool, NonZeroOp<scalar_t>, const scalar_t*>
+-          itr(self_.const_data_ptr<scalar_t>() + idx * chunk_size,
+-              NonZeroOp<scalar_t>());
++      thrust::counting_iterator<int64_t> counting_itr(idx * chunk_size);
++      auto itr = thrust::make_transform_iterator(
++          self_.const_data_ptr<scalar_t>() + idx * chunk_size,
++          NonZeroOp<scalar_t>());
+       temp_storage_bytes = 0;
+       AT_CUDA_CHECK(cub::DeviceSelect::Flagged(
+           nullptr,
+diff --git a/aten/src/ATen/native/cuda/TensorTopK.cu b/aten/src/ATen/native/cuda/TensorTopK.cu
+index 103b360bcb8..a08da7e2ecf 100644
+--- a/aten/src/ATen/native/cuda/TensorTopK.cu
++++ b/aten/src/ATen/native/cuda/TensorTopK.cu
+@@ -1,5 +1,7 @@
+ #define TORCH_ASSERT_NO_OPERATORS
+ #include <ATen/native/cuda/TensorTopK.h>
++#include <thrust/iterator/counting_iterator.h>
++#include <thrust/iterator/transform_iterator.h>
+ #include <ATen/core/TensorBase.h>
+ #include <ATen/ceil_div.h>
+ #include <ATen/Dispatch.h>
+@@ -721,8 +723,8 @@ void launch(
+     desired, counts, num_blocks, blocks_per_slice, kthCounts);
+   C10_CUDA_KERNEL_LAUNCH_CHECK();
+   // Do a prefix scan of withinKCounts and kthCounts using slice_idx as keys to get the starting index of each block
+-  using counting_iter_t = cub::CountingInputIterator<uint32_t, uint32_t>;
+-  using slice_idx_iter_t = cub::TransformInputIterator<uint32_t, BlockIdxToKey, counting_iter_t>;
++  using counting_iter_t = thrust::counting_iterator<uint32_t>;
++  using slice_idx_iter_t = thrust::transform_iterator<BlockIdxToKey, counting_iter_t>;
+   slice_idx_iter_t slice_idx_iter(counting_iter_t(0), BlockIdxToKey(blocks_per_slice));
+   at::cuda::cub::inclusive_sum_by_key(slice_idx_iter, withinKCounts, withinKCounts, num_blocks);
+   at::cuda::cub::inclusive_sum_by_key(slice_idx_iter, kthCounts, kthCounts, num_blocks);
+diff --git a/aten/src/ATen/native/cuda/UniqueCub.cu b/aten/src/ATen/native/cuda/UniqueCub.cu
+index 1bda65815d6..7c0b6913fa1 100644
+--- a/aten/src/ATen/native/cuda/UniqueCub.cu
++++ b/aten/src/ATen/native/cuda/UniqueCub.cu
+@@ -1,5 +1,7 @@
+ #define TORCH_ASSERT_ONLY_METHOD_OPERATORS
+ #include <ATen/native/cuda/UniqueCub.cuh>
++#include <thrust/iterator/transform_iterator.h>
++#include <thrust/functional.h>
+ 
+ #include <ATen/cuda/CUDAContext.h>
+ #include <ATen/cuda/detail/KernelUtils.h>
+@@ -54,7 +56,7 @@ struct LoadBoolOp {
+ auto wrap_input_iterator(const bool *data) {
+   // See NOTE [Loading boolean values]
+   LoadBoolOp op;
+-  return NO_ROCM(at_cuda_detail)::cub::TransformInputIterator<bool, LoadBoolOp, const uint8_t*, int>(
++  return thrust::make_transform_iterator(
+       reinterpret_cast<const uint8_t*>(data), op);
+ }
+ 
+@@ -259,10 +261,10 @@ struct UniqueCub<bool> {
+ 
+     const bool* self_data = self.const_data_ptr<bool>();
+     MapNumberOfTrueValues op;
+-    NO_ROCM(at_cuda_detail)::cub::TransformInputIterator<int, MapNumberOfTrueValues, const uint8_t*, int>
+-        data_iter(reinterpret_cast<const uint8_t*>(self_data), op);
++    auto data_iter = thrust::make_transform_iterator(
++        reinterpret_cast<const uint8_t*>(self_data), op);
+     at::cuda::cub::reduce(data_iter, tmp_num_true.get(), num_inp,
+-                          NO_ROCM(at_cuda_detail)::cub::Sum{}, 0);
++                          thrust::plus<int>(), 0);
+ 
+     auto options = self.options();
+     output = at::empty({2}, self.options());
+diff --git a/aten/src/ATen/native/transformers/cuda/flash_attn/flash_api.cpp b/aten/src/ATen/native/transformers/cuda/flash_attn/flash_api.cpp
+index 9eed9b69d8b..848b0828bd1 100644
+--- a/aten/src/ATen/native/transformers/cuda/flash_attn/flash_api.cpp
++++ b/aten/src/ATen/native/transformers/cuda/flash_attn/flash_api.cpp
+@@ -393,8 +393,9 @@ mha_fwd(const at::Tensor &q,         // batch_size x seqlen_q x num_heads x head
+     bool is_sm8x = dprops->major == 8 && dprops->minor >= 0;
+     bool is_sm90 = dprops->major == 9 && dprops->minor == 0;
+     bool is_sm10x = dprops->major == 10 && dprops->minor >= 0;
++    bool is_sm11x = dprops->major == 11 && dprops->minor >= 0;
+     bool is_sm120_or_sm121 = dprops->major == 12 && dprops->minor <= 1;
+-    TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
++    TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
+     // We will support Turing in the near future
+     // TORCH_CHECK(is_sm90 || is_sm8x || is_sm75, "FlashAttention only supports Turing GPUs or newer.");
+ 
+@@ -402,7 +403,7 @@ mha_fwd(const at::Tensor &q,         // batch_size x seqlen_q x num_heads x head
+     TORCH_CHECK(q_dtype == at::kHalf || q_dtype == at::kBFloat16,
+                 "FlashAttention only support fp16 and bf16 data type");
+     if (q_dtype == at::kBFloat16) {
+-        TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
++        TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
+     }
+     TORCH_CHECK(k.dtype() == q_dtype, "query and key must have the same dtype");
+     TORCH_CHECK(v.dtype() == q_dtype, "query and value must have the same dtype");
+@@ -581,8 +582,9 @@ mha_varlen_fwd(const at::Tensor &q,  // total_q x num_heads x head_size, total_q
+     bool is_sm8x = dprops->major == 8 && dprops->minor >= 0;
+     bool is_sm90 = dprops->major == 9 && dprops->minor == 0;
+     bool is_sm10x = dprops->major == 10 && dprops->minor >= 0;
++    bool is_sm11x = dprops->major == 11 && dprops->minor >= 0;
+     bool is_sm120_or_sm121 = dprops->major == 12 && dprops->minor <= 1;
+-    TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
++    TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
+     // We will support Turing in the near future
+     // TORCH_CHECK(is_sm90 || is_sm8x || is_sm75, "FlashAttention only supports Turing GPUs or newer.");
+ 
+@@ -590,7 +592,7 @@ mha_varlen_fwd(const at::Tensor &q,  // total_q x num_heads x head_size, total_q
+     TORCH_CHECK(q_dtype == at::kHalf || q_dtype == at::kBFloat16,
+                 "FlashAttention only support fp16 and bf16 data type");
+     if (q_dtype == at::kBFloat16) {
+-        TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
++        TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
+     }
+     TORCH_CHECK(k.dtype() == q_dtype, "query and key must have the same dtype");
+     TORCH_CHECK(v.dtype() == q_dtype, "query and value must have the same dtype");
+@@ -843,8 +845,9 @@ mha_bwd(const at::Tensor &dout,  // batch_size x seqlen_q x num_heads, x head_si
+     bool is_sm80 = dprops->major == 8 && dprops->minor == 0;
+     bool is_sm90 = dprops->major == 9 && dprops->minor == 0;
+     bool is_sm10x = dprops->major == 10 && dprops->minor >= 0;
++    bool is_sm11x = dprops->major == 11 && dprops->minor >= 0;
+     bool is_sm120_or_sm121 = dprops->major == 12 && dprops->minor <= 1;
+-    TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
++    TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
+     // We will support Turing in the near future
+     // TORCH_CHECK(is_sm90 || is_sm8x || is_sm75, "FlashAttention only supports Turing GPUs or newer.");
+ 
+@@ -855,7 +858,7 @@ mha_bwd(const at::Tensor &dout,  // batch_size x seqlen_q x num_heads, x head_si
+     TORCH_CHECK(q_dtype == at::kHalf || q_dtype == at::kBFloat16,
+                 "FlashAttention only support fp16 and bf16 data type");
+     if (q_dtype == at::kBFloat16) {
+-        TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
++        TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
+     }
+     TORCH_CHECK(k.dtype() == q_dtype, "query and key must have the same dtype");
+     TORCH_CHECK(v.dtype() == q_dtype, "query and value must have the same dtype");
+@@ -885,7 +888,7 @@ mha_bwd(const at::Tensor &dout,  // batch_size x seqlen_q x num_heads, x head_si
+     TORCH_CHECK(head_size_og % 8 == 0, "head_size_og should be a multiple of 8, this is ensured by padding!");
+     TORCH_CHECK(head_size <= 256, "FlashAttention backward only supports head dimension at most 256");
+     if (head_size > 192 && (head_size <= 224 || is_dropout)) {
+-        TORCH_CHECK(is_sm80 || is_sm90 || is_sm10x || is_sm120_or_sm121, "FlashAttention backward for head dim 256 with dropout, or head dim 224 with/without dropout requires A100/A800 or H100/H800");
++        TORCH_CHECK(is_sm80 || is_sm90 || is_sm10x || is_sm11x || is_sm120_or_sm121, "FlashAttention backward for head dim 256 with dropout, or head dim 224 with/without dropout requires A100/A800 or H100/H800");
+     }
+     TORCH_CHECK(num_heads % num_heads_k == 0, "Number of heads in key/value must divide number of heads in query");
+ 
+@@ -1060,8 +1063,9 @@ mha_varlen_bwd(const at::Tensor &dout,  // total_q x num_heads, x head_size
+     bool is_sm80 = dprops->major == 8 && dprops->minor == 0;
+     bool is_sm90 = dprops->major == 9 && dprops->minor == 0;
+     bool is_sm10x = dprops->major == 10 && dprops->minor >= 0;
++    bool is_sm11x = dprops->major == 11 && dprops->minor >= 0;
+     bool is_sm120_or_sm121 = dprops->major == 12 && dprops->minor <= 1;
+-    TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
++    TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
+     // We will support Turing in the near future
+     // TORCH_CHECK(is_sm90 || is_sm8x || is_sm75, "FlashAttention only supports Turing GPUs or newer.");
+     bool is_dropout = p_dropout > 0.0;
+@@ -1071,7 +1075,7 @@ mha_varlen_bwd(const at::Tensor &dout,  // total_q x num_heads, x head_size
+     TORCH_CHECK(q_dtype == at::kHalf || q_dtype == at::kBFloat16,
+                 "FlashAttention only support fp16 and bf16 data type");
+     if (q_dtype == at::kBFloat16) {
+-        TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
++        TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
+     }
+     TORCH_CHECK(k.dtype() == q_dtype, "query and key must have the same dtype");
+     TORCH_CHECK(v.dtype() == q_dtype, "query and value must have the same dtype");
+@@ -1106,7 +1110,7 @@ mha_varlen_bwd(const at::Tensor &dout,  // total_q x num_heads, x head_size
+     TORCH_CHECK(head_size_og % 8 == 0, "head_size_og should be a multiple of 8, this is ensured by padding!");
+     TORCH_CHECK(head_size <= 256, "FlashAttention backward only supports head dimension at most 256");
+     if (head_size > 192 && (head_size <= 224 || is_dropout)) {
+-        TORCH_CHECK(is_sm80 || is_sm90 || is_sm10x || is_sm120_or_sm121, "FlashAttention backward for head dim 256 with dropout, or head dim 224 with/without dropout requires A100/A800 or H100/H800");
++        TORCH_CHECK(is_sm80 || is_sm90 || is_sm10x || is_sm11x || is_sm120_or_sm121, "FlashAttention backward for head dim 256 with dropout, or head dim 224 with/without dropout requires A100/A800 or H100/H800");
+     }
+     TORCH_CHECK(num_heads % num_heads_k == 0, "Number of heads in key/value must divide number of heads in query");
+ 
+@@ -1284,8 +1288,9 @@ mha_fwd_kvcache(at::Tensor &q,                 // batch_size x seqlen_q x num_he
+     bool is_sm8x = dprops->major == 8 && dprops->minor >= 0;
+     bool is_sm90 = dprops->major == 9 && dprops->minor == 0;
+     bool is_sm10x = dprops->major == 10 && dprops->minor >= 0;
++    bool is_sm11x = dprops->major == 11 && dprops->minor >= 0;
+     bool is_sm120_or_sm121 = dprops->major == 12 && dprops->minor <= 1;
+-    TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
++    TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "FlashAttention only supports Ampere GPUs or newer.");
+     // We will support Turing in the near future
+     // TORCH_CHECK(is_sm90 || is_sm8x || is_sm75, "FlashAttention only supports Turing GPUs or newer.");
+ 
+@@ -1293,7 +1298,7 @@ mha_fwd_kvcache(at::Tensor &q,                 // batch_size x seqlen_q x num_he
+     TORCH_CHECK(q_dtype == at::kHalf || q_dtype == at::kBFloat16,
+                 "FlashAttention only support fp16 and bf16 data type");
+     if (q_dtype == at::kBFloat16) {
+-        TORCH_CHECK(is_sm120_or_sm121 || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
++        TORCH_CHECK(is_sm120_or_sm121 || is_sm11x || is_sm10x || is_sm90 || is_sm8x, "bfloat16 is only supported on Ampere GPUs or newer");
+     }
+     TORCH_CHECK(kcache.dtype() == q_dtype, "query and key must have the same dtype");
+     TORCH_CHECK(vcache.dtype() == q_dtype, "query and value must have the same dtype");
+diff --git a/aten/src/ATen/test/cuda_cub_test.cu b/aten/src/ATen/test/cuda_cub_test.cu
+index 5e5e25d2a8c..23a5b6a4d1c 100644
+--- a/aten/src/ATen/test/cuda_cub_test.cu
++++ b/aten/src/ATen/test/cuda_cub_test.cu
+@@ -1,4 +1,5 @@
+ #include <ATen/cuda/cub.cuh>
++#include <thrust/functional.h>
+ #include <ATen/cuda/CUDAContext.h>
+ #include <gtest/gtest.h>
+ 
+@@ -146,8 +147,8 @@ TEST(InclusiveScanSplit, CubTest) {
+   cudaMallocManaged(&output1, sizeof(int) * 10);
+ 
+   cudaDeviceSynchronize();
+-  at::cuda::cub::inclusive_scan<int *, int *, ::at_cuda_detail::cub::Sum, /*max_cub_size=*/2>(
+-    input, output1, ::at_cuda_detail::cub::Sum(), 10);
++  at::cuda::cub::inclusive_scan<int *, int *, thrust::plus<int>, /*max_cub_size=*/2>(
++    input, output1, thrust::plus<int>(), 10);
+   cudaDeviceSynchronize();
+ 
+   ASSERT_EQ(output1[0], 1);
+@@ -172,8 +173,8 @@ TEST(ExclusiveScanSplit, CubTest) {
+   cudaMallocManaged(&output2, sizeof(int) * 10);
+ 
+   cudaDeviceSynchronize();
+-  at::cuda::cub::exclusive_scan<int *, int *, ::at_cuda_detail::cub::Sum, int, /*max_cub_size=*/2>(
+-    input, output2, ::at_cuda_detail::cub::Sum(), 0, 10);
++  at::cuda::cub::exclusive_scan<int *, int *, thrust::plus<int>, int, /*max_cub_size=*/2>(
++    input, output2, thrust::plus<int>(), 0, 10);
+   cudaDeviceSynchronize();
+ 
+   ASSERT_EQ(output2[0], 0);
+diff --git a/cmake/Modules/FindCUB.cmake b/cmake/Modules/FindCUB.cmake
+index e053964e6e4..cc5ac48c315 100644
+--- a/cmake/Modules/FindCUB.cmake
++++ b/cmake/Modules/FindCUB.cmake
+@@ -4,6 +4,8 @@
+ 
+ find_path(CUB_INCLUDE_DIR
+         HINTS "${CUDA_TOOLKIT_INCLUDE}"
++              "/usr/local/cuda-13.0/targets/sbsa-linux/include/cccl"
++              "/usr/local/cuda/targets/sbsa-linux/include/cccl"
+         NAMES cub/cub.cuh
+         DOC "The directory where CUB includes reside"
+ )
+diff --git a/torch/_inductor/async_compile.py b/torch/_inductor/async_compile.py
+index 21e580d8d8f..44ff294d056 100644
+--- a/torch/_inductor/async_compile.py
++++ b/torch/_inductor/async_compile.py
+@@ -78,7 +78,11 @@ def pre_fork_setup():
+     # Computing the triton key can be slow. If we call it before fork,
+     # it will be cached for the forked subprocesses.
+     try:
+-        from triton.compiler.compiler import triton_key
++        try:
++            from triton.compiler.compiler import triton_key
++        except ImportError:
++            import triton as _triton_mod
++            triton_key = lambda: _triton_mod.__version__
+ 
+         triton_key()
+     except ImportError:
+diff --git a/torch/_inductor/codecache.py b/torch/_inductor/codecache.py
+index f259def02e4..1c9f5796006 100644
+--- a/torch/_inductor/codecache.py
++++ b/torch/_inductor/codecache.py
+@@ -202,7 +202,11 @@ class CacheBase:
+     @functools.cache
+     def get_system() -> dict[str, Any]:
+         try:
+-            from triton.compiler.compiler import triton_key
++            try:
++                from triton.compiler.compiler import triton_key
++            except ImportError:
++                import triton as _triton_mod
++                triton_key = lambda: _triton_mod.__version__
+ 
+             # Use triton_key instead of triton.__version__ as the version
+             # is not updated with each code change
+diff --git a/torch/utils/_triton.py b/torch/utils/_triton.py
+index fa2355463bb..13fa28c4669 100644
+--- a/torch/utils/_triton.py
++++ b/torch/utils/_triton.py
+@@ -6,7 +6,11 @@ from typing import Any
+ @functools.cache
+ def has_triton_package() -> bool:
+     try:
+-        from triton.compiler.compiler import triton_key
++        try:
++            from triton.compiler.compiler import triton_key
++        except ImportError:
++            import triton as _triton_mod
++            triton_key = lambda: _triton_mod.__version__
+ 
+         return triton_key is not None
+     except ImportError:
+@@ -160,7 +164,11 @@ def triton_backend() -> Any:
+ 
+ @functools.cache
+ def triton_hash_with_backend() -> str:
+-    from triton.compiler.compiler import triton_key
++    try:
++        from triton.compiler.compiler import triton_key
++    except ImportError:
++        import triton as _triton_mod
++        triton_key = lambda: _triton_mod.__version__
+ 
+     backend = triton_backend()
+     key = f"{triton_key()}-{backend.hash()}"
